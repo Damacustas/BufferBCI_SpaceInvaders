@@ -11,6 +11,8 @@ import java.util.ArrayList;
 /**
  * An implementation of Controller for the buffer_bci framework.
  *
+ * Doesn't define any axes or buttons on its own. These have to be added manually to an instance or a subclass.
+ *
  * Created by lars on 11/21/15.
  */
 public class BufferBciController implements Controller, BufferBciInput.ArrivedEventsListener {
@@ -85,6 +87,7 @@ public class BufferBciController implements Controller, BufferBciInput.ArrivedEv
      */
     @Override
     public void receiveEvents(BufferEvent[] events) {
+        // Since receiveEvents is called from the buffer_bci thread, claim the unprocessedEvents arraylist.
         synchronized (unprocessedEvents) {
             for (BufferEvent e : events) {
                 this.unprocessedEvents.add(e);
@@ -185,6 +188,65 @@ public class BufferBciController implements Controller, BufferBciInput.ArrivedEv
     }
 
     @Override
+    public String getName() {
+        return "buffer_bci controller";
+    }
+
+    @Override
+    public void addListener(ControllerListener listener) {
+        controllerListeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(ControllerListener listener) {
+        controllerListeners.remove(listener);
+    }
+
+    /**
+     * Represents a button.
+     */
+    private static class BufferBciButton
+    {
+        public int code;
+        public boolean activated;
+
+        public BufferBciButtonProcessor processor;
+    }
+
+    /**
+     * A button processor. A processor responds buffer events for the button.
+     */
+    public interface BufferBciButtonProcessor
+    {
+        boolean trigger(BufferEvent evt);
+        boolean isActivated(BufferEvent evt);
+    }
+
+    /**
+     * Represents an axis.
+     */
+    private class BufferBciAxis
+    {
+        public int code;
+        public float value;
+
+        public BufferBciAxisProcessor processor;
+    }
+
+    /**
+     * An axis processor. A processor responds to buffer events for the axis.
+     */
+    public interface BufferBciAxisProcessor
+    {
+        boolean trigger(BufferEvent evt);
+        float getValue(BufferEvent evt);
+    }
+
+
+
+    /** Unimplemented methods **/
+
+    @Override
     public PovDirection getPov(int povCode) {
         return null;
     }
@@ -207,48 +269,5 @@ public class BufferBciController implements Controller, BufferBciInput.ArrivedEv
     @Override
     public void setAccelerometerSensitivity(float sensitivity) {
 
-    }
-
-    @Override
-    public String getName() {
-        return "buffer_bci controller";
-    }
-
-    @Override
-    public void addListener(ControllerListener listener) {
-        controllerListeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(ControllerListener listener) {
-        controllerListeners.remove(listener);
-    }
-
-    private static class BufferBciButton
-    {
-        public int code;
-        public boolean activated;
-
-        public BufferBciButtonProcessor processor;
-    }
-
-    public interface BufferBciButtonProcessor
-    {
-        boolean trigger(BufferEvent evt);
-        boolean isActivated(BufferEvent evt);
-    }
-
-    private class BufferBciAxis
-    {
-        public int code;
-        public float value;
-
-        public BufferBciAxisProcessor processor;
-    }
-
-    public interface BufferBciAxisProcessor
-    {
-        boolean trigger(BufferEvent evt);
-        float getValue(BufferEvent evt);
     }
 }

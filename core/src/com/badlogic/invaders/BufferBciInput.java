@@ -54,6 +54,9 @@ public class BufferBciInput {
 
     /**
      * Adds the provided listener.
+     *
+     * Note: Events are provided on the buffer_bci thread, NOT on the main thread.
+     *
      * @param listener
      */
     public void addArrivedEventsListener(ArrivedEventsListener listener) {

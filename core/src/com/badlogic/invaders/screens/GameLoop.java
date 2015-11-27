@@ -35,9 +35,9 @@ public class GameLoop extends InvadersScreen implements SimulationListener {
 	/** shot sound **/
 	private final Sound shot;
 
+	/****** BufferBCI support ******/
     /** buffer client **/
     protected final BufferBciInput buffer;
-
 	/** buffer_bci controller **/
 	protected final InvadersController controller;
 
@@ -69,13 +69,10 @@ public class GameLoop extends InvadersScreen implements SimulationListener {
         buffer = new BufferBciInput(10);
         buffer.connect("localhost", 1972);
 
+		// Create a controller and add it as a listener.
 		controller = new InvadersController();
 		controller.addListener(listener);
 		buffer.addArrivedEventsListener(controller);
-
-		if (invaders.getController() != null) {
-			invaders.getController().addListener(listener);
-		}
 	}
 
 	@Override
@@ -109,7 +106,7 @@ public class GameLoop extends InvadersScreen implements SimulationListener {
 
 		// move ship.
 		float axisValue = controller.getAxis(InvadersController.AXIS_X) * 0.5f;
-		if (Math.abs(axisValue) > 0.25f) {
+		if (Math.abs(axisValue) > 0.125f) { // Use a threshold for actuation.
 			if (axisValue > 0) {
 				simulation.moveShipRight(delta, axisValue);
 			} else {
